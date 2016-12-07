@@ -1,0 +1,40 @@
+/** gradle -b gradle_in_action/chapter4.gradle -q printVersion -Pusername=benjamin **/
+
+/**
+ * 按照如下的两种方式访问gradle.properties中的变量
+ * 如果属性在gradle.properties中存在，可以使用gradle printName打印
+ * 如果属性在gradle.properties中不存在，可以使用gradle printName -Pusername=benjamin 来打印
+ */
+//assert project.username == 'benjamin'
+task printName << {
+    println "my name is $username"
+}
+
+/**
+ * 执行命令 gradle tasks 可以看到group和description的信息
+ */
+version = '0.1-SNAPSHOT'
+task printVersion {
+    // 任务分组名
+    group = 'versioning'
+    // 任务描述
+    description = 'Prints project version'
+    doFirst {
+        println "Before reading the project version"
+    }
+    doLast {
+        logger.quiet "Version: $version"
+    }
+}
+
+/**
+ * 定义task依赖
+ * gradle -b gradle_in_action/chapter4.gradle -q printVersion2
+ */
+task first << { println "first" }
+task second << { println "second" }
+task printVersion2(dependsOn: [second, first]) << {
+    logger.quiet "Version2: $version"
+}
+task third << { println "third" }
+third.dependsOn('printVersion2')

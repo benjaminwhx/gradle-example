@@ -6,14 +6,22 @@ apply plugin: 'war'
 
 sourceCompatibility = 1.8
 
-// jetty插件
+/**
+ * jetty插件
+ * 端口8080
+ * 上下文名称 todo
+ */
 apply plugin: 'jetty'
 jettyRun {
     httpPort = 8080
     contextPath = 'todo'
 }
 
-// 定义包装器
+/**
+ * 定义包装器
+ * gradle wrapper
+ * 执行后没有安装gradle的用户可以执行 gradlew jettyRun来启动项目
+ */
 task wrapper(type: Wrapper) {
     gradleVersion = '3.2.1'
     // 获取gradle包装器的url，我们可以下载下来放在内网里供大家下载
