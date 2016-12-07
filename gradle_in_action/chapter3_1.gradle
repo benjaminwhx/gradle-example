@@ -1,0 +1,52 @@
+apply plugin: 'java'
+
+// 打出的jar包后会加上 -0.1，比如 gradle-example-0.1.jar
+version = 0.1
+// 源码编译版本
+sourceCompatibility = 1.8
+
+// jar包的manifest文件增加 Main-Class: 自定义的类，作为执行程序的入口
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.jd.**.customClass'
+        attributes 'Manifest-Version': '2.0'
+    }
+}
+
+sourceSets {
+    main {
+        java {
+//            srcDirs = ['src/main/java']
+            srcDir = 'src/main/java'
+        }
+        resources {
+            srcDir = 'src/main/resources'
+        }
+    }
+    test {
+        java {
+            srcDir = 'src/test/java'
+        }
+        resources {
+            srcDir = 'src/test/resources'
+        }
+    }
+}
+
+// 改变项目输出属性（路径）到out目录
+buildDir 'out'
+
+repositories {
+    // 自定义maven下载地址
+    maven {
+        url = 'http://maven.aliyun.com/nexus/content/groups/public/'
+    }
+    // 中央仓库下载jar包
+//    mavenCentral()
+    // 本地仓库默认maven的.m2/repository
+//    mavenLocal()
+}
+
+dependencies {
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.1'
+}

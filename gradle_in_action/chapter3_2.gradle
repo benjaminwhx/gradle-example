@@ -1,0 +1,23 @@
+group 'com.jd.bt'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'war'
+
+sourceCompatibility = 1.8
+
+// jetty插件
+apply plugin: 'jetty'
+jettyRun {
+    httpPort = 8080
+    contextPath = 'todo'
+}
+
+// 定义包装器
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.2.1'
+    // 获取gradle包装器的url，我们可以下载下来放在内网里供大家下载
+//    distributionUrl = 'http://myenterprise.com/gradle/dists'
+    // 包装器被解压后存放的相对路径
+//    distributionPath = 'gradle-dists'
+}
