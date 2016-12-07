@@ -30,6 +30,7 @@ task printVersion {
 /**
  * 定义task依赖
  * gradle -b gradle_in_action/chapter4.gradle -q printVersion2
+ * first 和 second的顺序是不确定的
  */
 task first << { println "first" }
 task second << { println "second" }
@@ -38,3 +39,183 @@ task printVersion2(dependsOn: [second, first]) << {
 }
 task third << { println "third" }
 third.dependsOn('printVersion2')
+
+/**
+ * 终结器task
+ * 相当于java中的finally,最后执行的意思。
+ * 即使终结器task失败了,gradle的task也会按预期运行
+ */
+task a << { println "a" }
+task b << { println "b" }
+a.finalizedBy b
+
+/**
+ * 通过POGO来定义项目版本
+ */
+class ProjectVersion {
+    int major
+    int minor
+    boolean release
+
+    ProjectVersion(int major, int minor) {
+        this.major = major;
+        this.minor = minor;
+        this.release = false;
+    }
+
+    ProjectVersion(int major, int minor, boolean release) {
+        this.major = major
+        this.minor = minor
+        this.release = release
+    }
+
+
+    @Override
+    public String toString() {
+        return "$major.$minor${release ? '' : '-SNAPSHOT'}";
+    }
+}
+
+/**
+ * gradle -b gradle_in_action/chapter4.gradle -q printVersion3
+ * 使用上面的POGO,然后通过ext来自定义属性,最后通过toString打印出结果
+ */
+ext.version3 = new ProjectVersion(0, 2)
+task printVersion3 << {
+    println "Version3: $version3"
+}
+
+/**
+ * 读取配置文件里的配置
+ */
+ext.versionFile = file('version.properties')
+
+ProjectVersion readVersion() {
+    logger.quiet 'Reading the version file.'
+
+    if (!versionFile.exists()) {
+        throw new GradleException("Required version file does not exist. $versionFile.canonicalPath")
+    }
+    Properties properties = new Properties();
+
+//    properties.load(new FileInputStream(versionFile))
+    // Groovy的文件通过新添加的方法来读取InputStream
+    versionFile.withInputStream {
+        stream -> properties.load(stream);
+    }
+
+    new ProjectVersion(properties.major.toInteger(), properties.minor.toInteger(), properties.release.toBoolean())
+}
+
+/**
+ * task配置块没有 << 操作符,它永远在task动作执行之前被执行
+ */
+task loadVersion {
+    project.version = readVersion()
+}
+/**
+ * gradle -b gradle_in_action/chapter4.gradle -q printVersion4
+ * 我们执行printVersion4的时候,会先执行loadVersion加载version配置
+ */
+task printVersion4 << {
+    println "Version4: $version"
+}
+
+/**
+ * 通过inputs和outputs来改变version.properties中的属性值来达到更换项目版本从SNAPSHOT到release的过程
+ * 执行gradle makeReleaseVersion 后执行 gradle printVersion4看看是不是变化了
+ */
+task makeReleaseVersion(group: 'versioning', description: 'Makes project a release version.') << {
+    version.release = true
+    ant.propertyfile(file: versionFile) {
+        entry(key: 'release', type: 'string', operation: '=', value: 'true')
+    }
+}
+
+/**
+ * 配置和动作代码分离
+ * 这个和上面配置的区别是利用了inputs和outputs来实现自动跳过检查
+ * 如果执行两次 gradle makeReleaseVersion2就会发现第二次跳过了执行。出现了UP-TO-DATE
+ * 如果你没有手动修改属性文件中的release属性,那么makeReleaseVersion2将被标记为最新的,永远会被跳过执行
+ */
+task makeReleaseVersion2(group: 'versioning', description: 'Makes project a release version.') {
+    inputs.property('release', version.release)
+    outputs.file versionFile
+    doLast {
+        version.release = true
+        ant.propertyfile(file: versionFile) {
+            entry(key: 'release', type: 'string', operation: '=', value: 'true')
+        }
+    }
+}
+
+/**
+ * 自定义task
+ */
+class ReleaseVersionTask extends DefaultTask {
+    @Input Boolean release
+    @OutputFile File destFile
+
+    ReleaseVersionTask() {
+        group = 'versioning'
+        description = 'Makes project a release version'
+    }
+
+    @TaskAction
+    void start() {
+        project.version.release = true
+        ant.propertyfile(file: destFile) {
+            entry(key: 'release', type: 'string', operation: '=', value: 'true')
+        }
+    }
+}
+
+task makeReleaseVersion3(type: ReleaseVersionTask) {
+    release = version.release
+    destFile = versionFile
+}
+
+apply plugin: 'war'
+
+task createDistribution(type: Zip, dependsOn: makeReleaseVersion) {
+    // 隐式引用War task的输出
+    from war.outputs.files
+
+    // 把所有源文件都放到ZIP文件的src目录下
+    from(sourceSets*.allSource) {
+        into 'src'
+    }
+
+    // 为ZIP添加版本文件
+    from(rootDir) {
+        include versionFile.name
+    }
+}
+
+task backupReleaseDistribution(type: Copy) {
+    // 隐式引用createDistribution task的输出
+    from createDistribution.outputs.files
+    into "$buildDir/backup"
+}
+
+/**
+ * 内置task类型
+ * 执行 gradle release
+ * 构建的输出:
+ * :makeReleaseVersion
+ * :compileJava UP-TO-DATE
+ * :processResources UP-TO-DATE
+ * :classes UP-TO-DATE
+ * :war
+ * :createDistribution
+ * :backupReleaseDistribution
+ * :release
+ *
+ * 其实通过使用一个task的输出作为另一个task的输入,Gradle就可以
+ * 推断出依赖关系了。
+ * 运行构建后,你可以在build/distributions目录下找到所生成的zip文件,
+ * 这个目录是用于归档task的默认输出目录。
+ */
+task release(dependsOn: backupReleaseDistribution) << {
+    logger.quiet 'Releasing the project...'
+}
