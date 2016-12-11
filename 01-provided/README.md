@@ -1,4 +1,4 @@
-# Maven的Provided scope的实现
+# Gradle的Provided scope的实现
 The implementation of provided scope like maven in gradle project
 
 ```
