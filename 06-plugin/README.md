@@ -12,4 +12,4 @@
 gradle run
 ```
 
-剩余的使用参考官网: [Gradle_application_plugin](剩余的配置参考官网：https://docs.gradle.org/current/userguide/application_plugin.html)
+剩余的使用参考官网: [Gradle_application_plugin](https://docs.gradle.org/current/userguide/application_plugin.html)
