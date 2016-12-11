@@ -14,3 +14,10 @@
 
 | 编号 | 描述 |
 |--------|--------|
+|01-provided |gradle中类似于maven中provided scope的实现 |
+|02-garbled |gradle中乱码的解决方案 |
+|03-module |gradle中模块化的构建 |
+|04-profile |gradle中类似于maven中profile的实现 |
+|05-command |gradle中的命令行的使用 |
+|06-plugin |gradle中各种有用的plugin的使用 |
+|07-transtive |gradle中jar包的依赖传递使用 |
