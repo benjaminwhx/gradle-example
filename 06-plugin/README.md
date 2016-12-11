@@ -4,7 +4,7 @@
 
 ## 1、application
 
-具体使用参考: []()
+具体使用参考: [application.gradle](https://github.com/benjaminwhx/gradle-example/blob/master/06-plugin/application.gradle)
 
 配置完后直接执行下面的命令: 
 
