@@ -10,5 +10,5 @@
 
 # 解决方法
 
-方法1-3: []()
-方法4: []()
+方法1-3: [garbled.gradle](https://github.com/benjaminwhx/gradle-example/blob/master/02-garbled/garbled.gradle)
+方法4: [gradle.properties](https://github.com/benjaminwhx/gradle-example/blob/master/02-garbled/gradle.properties)
