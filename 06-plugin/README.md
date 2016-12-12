@@ -19,4 +19,11 @@ gradle run
 
 ## 2、idea
 
+官网地址：[plugin_idea](https://docs.gradle.org/current/userguide/idea_plugin.html)
+翻译地址：[plugin_idea翻译](http://blog.csdn.net/maosidiaoxian/article/details/47291703)
+
 ## 3、maven-publish
+
+官网地址：[plugin_maven_publish](https://docs.gradle.org/current/userguide/publishing_maven.html)
+
+其他插件地址：[貌似掉线的csdn博客](http://blog.csdn.net/maosidiaoxian/article/category/2219983/1)
